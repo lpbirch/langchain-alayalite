@@ -127,11 +127,36 @@ class AlayaLite(VectorStore):
 
         # Add to the collection
         # Tuple(id, document, embedding, metadata)
-        self._collection.insert(list(zip(ids, texts, embeddings, metadatas)))
+        self._collection.upsert(list(zip(ids, texts, embeddings, metadatas)))
         self._client.save_collection(collection_name=self._collection_name)
+        
+        return list(ids)
+           
+           
+    def add_documents(
+        self,
+        documents: List[Document],
+        **kwargs: Any,
+    ) -> List[str]:
 
-    
-        return ids
+        texts = [doc.page_content for doc in documents]
+        metadatas = [doc.metadata for doc in documents]
+
+        ids = kwargs.get("ids", None)
+
+        if ids is None:
+            ids = [
+                doc.id if doc.id is not None else str(uuid.uuid4())
+                for doc in documents
+            ]
+
+        return self.add_texts(
+            texts=texts,
+            metadatas=metadatas,
+            ids=ids,
+        )
+
+
     @classmethod
     def from_texts(
         cls,
@@ -279,11 +304,17 @@ class AlayaLite(VectorStore):
                 self._collection.delete_by_id(ids)
 
             # Save changes
-            if hasattr(self._client, 'save_collection'):
+            # Save changes (only if index exists)
+            if (
+                hasattr(self._client, "save_collection")
+                and getattr(self._collection, "_Collection__index_py", None) is not None
+            ):
                 self._client.save_collection(
                     collection_name=self._collection_name
                 )
+
             return True
+
 
         except Exception:
             logger.exception("Error deleting vectors from AlayaLite")
@@ -302,6 +333,13 @@ class AlayaLite(VectorStore):
         Returns:
             List of Documents most similar to the query vector.
         """
+        if self._collection is None:
+            return []
+
+        if not getattr(self._collection, "_Collection__index_py", None):
+            return []
+        
+        
         ef_search = kwargs.pop("ef_search", 10)
         num_threads = kwargs.pop("num_threads", 1)
         res = self._collection.batch_query(
@@ -309,9 +347,14 @@ class AlayaLite(VectorStore):
         )
 
         docs = [
-            Document(page_content=doc, metadata=metadata)
-            for doc, metadata in zip(res["document"][0], res["metadata"][0])
+            Document(page_content=doc, metadata=metadata, id=id_)
+            for id_, doc, metadata in zip(
+                res["id"][0],
+                res["document"][0],
+                res["metadata"][0],
+            )
         ]
+
         return docs    
 
     def similarity_search(
@@ -358,8 +401,12 @@ class AlayaLite(VectorStore):
         )
 
         docs = [
-            Document(page_content=doc, metadata=metadata)
-            for doc, metadata in zip(res["document"][0], res["metadata"][0])
+            Document(page_content=doc, metadata=metadata, id=id_)
+            for id_, doc, metadata in zip(
+                res["id"][0],
+                res["document"][0],
+                res["metadata"][0],
+            )
         ]
 
         scores = [self._euclidean_relevance_score_fn(dis) for dis in res["distance"][0]]
@@ -417,18 +464,38 @@ class AlayaLite(VectorStore):
             res.get("document", []),
             res.get("metadata", []),
         ):
-            meta = dict(metadata) if metadata else {}
-            meta["id"] = doc_id
 
             documents.append(
                 Document(
                     page_content=content,
-                    metadata=meta,
+                    metadata=metadata,
+                    id=doc_id,
                 )
             )
 
+
         return documents
 
+    def delete_collection(self) -> None:
+        """
+        Delete the entire collection from the database.
+
+        This method completely removes the collection and all its data.
+        After calling this method, the internal collection reference will be None.
+        
+        Note: The collection object will need to be recreated if you want to use it again.
+        """
+        try:
+            if self._collection_name in self._client.list_collections():
+                self._client.delete_collection(collection_name=self._collection_name)
+                logger.info(f"Collection '{self._collection_name}' deleted successfully.")
+            
+            # Reset the internal collection reference
+            self._collection = None
+            
+        except Exception as e:
+            logger.error(f"Failed to delete collection '{self._collection_name}': {e}")
+            raise
 
 '''
     @staticmethod

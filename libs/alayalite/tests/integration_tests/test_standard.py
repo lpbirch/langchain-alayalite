@@ -1,14 +1,15 @@
 import uuid
-from typing import Generator, List
+from collections.abc import Generator
 
 import pytest
-
 from langchain_core.documents import Document
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.vectorstores import VectorStore
+
 from langchain_alayalite.vectorstores import AlayaLite
 
 EMBEDDING_SIZE = 6
+
 
 @pytest.fixture()
 def embeddings():
@@ -35,9 +36,11 @@ def vectorstore(embeddings) -> Generator[VectorStore, None, None]:
         except Exception:
             pass
 
+
 def test_vectorstore_is_empty(vectorstore: VectorStore):
     assert vectorstore.similarity_search("foo", k=1) == []
-    
+
+
 def test_add_documents(vectorstore: VectorStore) -> None:
     original_documents = [
         Document(page_content="foo", metadata={"id": 1}),
@@ -49,16 +52,18 @@ def test_add_documents(vectorstore: VectorStore) -> None:
         Document(page_content="bar", metadata={"id": 2}, id=ids[1]),
         Document(page_content="foo", metadata={"id": 1}, id=ids[0]),
     ]
-        # Verify that the original document object does not get mutated!
-        # (e.g., an ID is added to the original document object)
+    # Verify that the original document object does not get mutated!
+    # (e.g., an ID is added to the original document object)
     assert original_documents == [
         Document(page_content="foo", metadata={"id": 1}),
         Document(page_content="bar", metadata={"id": 2}),
     ]
 
+
 def test_vectorstore_still_empty(vectorstore: VectorStore) -> None:
     assert vectorstore.similarity_search("foo", k=1) == []
-    
+
+
 def test_deleting_documents(vectorstore: VectorStore) -> None:
     """Test deleting documents from the `VectorStore`.
 
@@ -77,7 +82,7 @@ def test_deleting_documents(vectorstore: VectorStore) -> None:
     vectorstore.delete(["1"])
     documents = vectorstore.similarity_search("foo", k=1)
     assert documents == [Document(page_content="bar", metadata={"id": 2}, id="2")]
-    
+
 
 def test_deleting_bulk_documents(vectorstore: VectorStore) -> None:
     """Test that we can delete several documents at once.
@@ -97,7 +102,7 @@ def test_deleting_bulk_documents(vectorstore: VectorStore) -> None:
     vectorstore.delete(["1", "2"])
     documents = vectorstore.similarity_search("foo", k=1)
     assert documents == [Document(page_content="baz", metadata={"id": 3}, id="3")]
-    
+
 
 def test_delete_missing_content(vectorstore: VectorStore) -> None:
     """Deleting missing content should not raise an exception.
@@ -110,7 +115,7 @@ def test_delete_missing_content(vectorstore: VectorStore) -> None:
 
     vectorstore.delete(["1"])
     vectorstore.delete(["1", "2", "3"])
-    
+
 
 def test_add_documents_with_ids_is_idempotent(vectorstore: VectorStore) -> None:
     """Adding by ID should be idempotent.
@@ -132,7 +137,7 @@ def test_add_documents_with_ids_is_idempotent(vectorstore: VectorStore) -> None:
         Document(page_content="bar", metadata={"id": 2}, id="2"),
         Document(page_content="foo", metadata={"id": 1}, id="1"),
     ]
-    
+
 
 def test_add_documents_by_id_with_mutation(vectorstore: VectorStore) -> None:
     """Test that we can overwrite by ID using `add_documents`.
@@ -152,9 +157,7 @@ def test_add_documents_by_id_with_mutation(vectorstore: VectorStore) -> None:
 
     # Now over-write content of ID 1
     new_documents = [
-        Document(
-            page_content="new foo", metadata={"id": 1, "some_other_field": "foo"}
-        ),
+        Document(page_content="new foo", metadata={"id": 1, "some_other_field": "foo"}),
     ]
 
     vectorstore.add_documents(documents=new_documents, ids=["1"])
@@ -169,6 +172,7 @@ def test_add_documents_by_id_with_mutation(vectorstore: VectorStore) -> None:
         ),
         Document(id="2", page_content="bar", metadata={"id": 2}),
     ]
+
 
 def test_get_by_ids(vectorstore: VectorStore) -> None:
     """Test get by IDs.
@@ -205,9 +209,9 @@ def test_get_by_ids(vectorstore: VectorStore) -> None:
         ]
     )
 
-def _sort_by_id(docs: List[Document]) -> List[Document]:
-    return sorted(docs, key=lambda d: d.id)
 
+def _sort_by_id(docs: list[Document]) -> list[Document]:
+    return sorted(docs, key=lambda d: d.id)
 
 
 def test_get_by_ids_missing(vectorstore: VectorStore) -> None:
@@ -235,7 +239,7 @@ def test_get_by_ids_missing(vectorstore: VectorStore) -> None:
     assert documents == []
 
 
-def test_add_documents_documents( vectorstore: VectorStore) -> None:
+def test_add_documents_documents(vectorstore: VectorStore) -> None:
     """Run `add_documents` tests.
 
     ??? note "Troubleshooting"
@@ -311,9 +315,3 @@ def test_add_documents_with_existing_ids(vectorstore: VectorStore) -> None:
             Document(page_content="bar", metadata={"id": 2}, id=ids[1]),
         ]
     )
-
-
-
-
-
-

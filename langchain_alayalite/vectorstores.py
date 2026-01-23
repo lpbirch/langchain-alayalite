@@ -13,14 +13,12 @@ from typing import (
     Tuple,
     Sequence,
 )
-import numpy as np
 
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
-from langchain_core.runnables.config import run_in_executor
 from langchain_core.vectorstores import VectorStore
-from langchain_alayalite.alayalite import Client
+
 
 
 logger = logging.getLogger(__name__)
@@ -40,12 +38,12 @@ class AlayaLite(VectorStore):
         
         
         try:
-            import langchain_alayalite.alayalite as alayalite
-        except ImportError:
+            import alayalite
+        except ImportError as e:
             raise ImportError(
-                "Could not import alayalite python package. "
-                "Please install it with `pip install alayalite`."
-            )
+                "alayalite is required. Install it with `pip install alayalite`."
+            ) from e
+
             
             
         self._embedding_function = embedding_function
@@ -64,6 +62,11 @@ class AlayaLite(VectorStore):
                 self._client.delete_collection(collection_name=collection_name)
 
         self._collection = self._client.get_or_create_collection(name=collection_name) 
+    
+    @property
+    def embeddings(self) -> Optional[Embeddings]:
+        """Access the query embedding object if available."""
+        return self._embedding_function
     
     def add_texts(
         self,
@@ -469,13 +472,9 @@ class AlayaLite(VectorStore):
         """Async delete - Not supported."""
         self._async_not_supported("adelete")
         
-    async def afrom_documents(
-        cls,
-        documents: List[Document],
-        embedding: Embeddings,
-        **kwargs: Any,
-    ) -> "AlayaLite":
-        """Async from_documents - Not supported."""
+    @classmethod
+    async def afrom_documents(cls, *args, **kwargs) -> "AlayaLite":
         cls._async_not_supported("afrom_documents")
+
         
 '''

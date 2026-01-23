@@ -45,7 +45,7 @@ def test_alayalite_initialization(test_embeddings: ConsistentFakeEmbeddings) -> 
     )
     assert store is not None
     assert store.embeddings == test_embeddings
-    assert store.collection_name == "test_init"
+    assert store._collection_name == "test_init"
 
 
 def test_alayalite_add_texts(alayalite_store: AlayaLite) -> None:
@@ -174,4 +174,3 @@ def test_alayalite_from_documents(test_embeddings: ConsistentFakeEmbeddings) -> 
 
 def test_alayalite_async_methods_not_implemented(alayalite_store: AlayaLite) -> None:
     pass
-

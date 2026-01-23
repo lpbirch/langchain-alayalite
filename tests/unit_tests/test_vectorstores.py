@@ -26,5 +26,5 @@ def test_similarity_search() -> None:
         metadatas=metadatas,
     )
     output = docsearch.similarity_search("foo", k=1)
-    docsearch.delete_collection()
+    docsearch.delete()
     assert len(output) == 1

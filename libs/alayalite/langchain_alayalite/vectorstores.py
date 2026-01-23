@@ -1,42 +1,33 @@
 from __future__ import annotations
+
 __all__ = ["AlayaLite"]
 
-from itertools import cycle
 import logging
 import uuid
+from collections.abc import Iterable, Sequence
+from itertools import cycle
 from typing import (
     Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Tuple,
-    Sequence,
 )
-
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
 
-
-
 logger = logging.getLogger(__name__)
 
-class AlayaLite(VectorStore):
 
+class AlayaLite(VectorStore):
     def __init__(
         self,
         embedding_function: Embeddings,
         collection_name: str = "DefaultCollection",
-        index_params: Optional[Dict[str, Any]] = None,
-        search_params: Optional[Dict[str, Any]] = None,
+        index_params: dict[str, Any] | None = None,
+        search_params: dict[str, Any] | None = None,
         drop_old: bool = False,
         url: str = ".alayalite_data",
         **kwargs: Any,
     ):
-        
-        
         try:
             import alayalite
         except ImportError as e:
@@ -44,8 +35,6 @@ class AlayaLite(VectorStore):
                 "alayalite is required. Install it with `pip install alayalite`."
             ) from e
 
-            
-            
         self._embedding_function = embedding_function
         self._collection_name = collection_name
         self._index_params = index_params or {}
@@ -53,29 +42,27 @@ class AlayaLite(VectorStore):
         self._drop_old = drop_old
         self._url = url
 
-
         self._client = alayalite.Client(url=self._url)
-
 
         if drop_old:
             if collection_name in self._client.list_collections():
                 self._client.delete_collection(collection_name=collection_name)
 
-        self._collection = self._client.get_or_create_collection(name=collection_name) 
-    
+        self._collection = self._client.get_or_create_collection(name=collection_name)
+
     @property
-    def embeddings(self) -> Optional[Embeddings]:
+    def embeddings(self) -> Embeddings | None:
         """Access the query embedding object if available."""
         return self._embedding_function
-    
+
     def add_texts(
         self,
         texts: Iterable[str],
-        metadatas: Optional[List[dict]] = None,
+        metadatas: list[dict] | None = None,
         # This is not yet enforced in the type signature for backwards compatibility
         # with existing implementations.
         **kwargs: Any,
-    ) -> List[str]:
+    ) -> list[str]:
         """Run more texts through the embeddings and add to the vectorstore.
 
         Args:
@@ -97,7 +84,6 @@ class AlayaLite(VectorStore):
             logger.debug("No texts to add, skipping.")
             return []
 
-
         # Get the ids
         ids = kwargs.get("ids", None)
         if ids is None:
@@ -106,7 +92,6 @@ class AlayaLite(VectorStore):
             if len(ids) != len(texts):
                 raise ValueError("Length of `ids` must be equal to length of `texts`.")
 
-
         # Embedding the texts
         try:
             embeddings = self._embedding_function.embed_documents(texts)
@@ -114,31 +99,32 @@ class AlayaLite(VectorStore):
             # Catch more possible exceptions
             # AttributeError: method does not exist
             # NotImplementedError: method exists but is not implemented
-            logger.warning(f"Batch embedding failed, falling back to single text embedding: {e}")
+            logger.warning(
+                f"Batch embedding failed, falling back to single text embedding: {e}"
+            )
             embeddings = [self._embedding_function.embed_query(text) for text in texts]
-
 
         # Process the metadatas
         if metadatas and len(metadatas) != len(texts):
             raise ValueError(
                 "Length of `metadatas` must be equal to length of `texts`."
             )
-        metadatas = iter(metadatas) if metadatas else cycle([{}])
+        metadatas_iter = iter(metadatas) if metadatas else cycle([{}])
 
         # Add to the collection
         # Tuple(id, document, embedding, metadata)
-        self._collection.upsert(list(zip(ids, texts, embeddings, metadatas)))
+        self._collection.upsert(
+            list(zip(ids, texts, embeddings, metadatas_iter, strict=False))
+        )
         self._client.save_collection(collection_name=self._collection_name)
-        
+
         return list(ids)
-           
-           
+
     def add_documents(
         self,
-        documents: List[Document],
+        documents: list[Document],
         **kwargs: Any,
-    ) -> List[str]:
-
+    ) -> list[str]:
         texts = [doc.page_content for doc in documents]
         metadatas = [doc.metadata for doc in documents]
 
@@ -146,8 +132,7 @@ class AlayaLite(VectorStore):
 
         if ids is None:
             ids = [
-                doc.id if doc.id is not None else str(uuid.uuid4())
-                for doc in documents
+                doc.id if doc.id is not None else str(uuid.uuid4()) for doc in documents
             ]
 
         return self.add_texts(
@@ -156,13 +141,12 @@ class AlayaLite(VectorStore):
             ids=ids,
         )
 
-
     @classmethod
     def from_texts(
         cls,
-        texts: List[str],
+        texts: list[str],
         embedding: Embeddings,
-        metadatas: Optional[List[dict]] = None,
+        metadatas: list[dict] | None = None,
         **kwargs: Any,
     ) -> AlayaLite:
         """Return VectorStore initialized from texts and embeddings.
@@ -188,20 +172,21 @@ class AlayaLite(VectorStore):
             **kwargs,
         )
 
-        return vector_db    
+        return vector_db
+
     @classmethod
     def from_documents(
         cls,
-        documents: List[Document],
+        documents: list[Document],
         embedding: Embeddings,
         **kwargs: Any,
-    ) -> "AlayaLite":
+    ) -> AlayaLite:
         """
         Return AlayaLite vector store initialized from documents and embeddings.
-        
+
         This method extracts text content and metadata from Document objects,
         then uses the from_texts method to create and populate the vector store.
-        
+
         Args:
             documents: List of Document objects to add to the vector store.
                       Each Document has:
@@ -216,24 +201,24 @@ class AlayaLite(VectorStore):
                      - search_params: search configuration parameters
                      - drop_old: whether to delete existing collection (default: False)
                      - url: data storage path (default: ".alayalite_data")
-        
+
         Returns:
             AlayaLite: Initialized and populated vector store instance.
         """
         # Extract texts and metadatas from Document objects
         texts = [doc.page_content for doc in documents]
         metadatas = [doc.metadata for doc in documents]
-        
+
         # Check if any Document has an id attribute
         # Some Document implementations might have an id field
-        document_ids = []
+        document_ids: list[str | None] = []
         for doc in documents:
             # Check if Document has id attribute (not all implementations do)
-            if hasattr(doc, 'id') and doc.id is not None:
+            if hasattr(doc, "id") and doc.id is not None:
                 document_ids.append(doc.id)
             else:
                 document_ids.append(None)
-        
+
         # Only pass ids if at least one document has a valid id
         # This follows the same logic as the base class implementation
         if any(id_val is not None for id_val in document_ids):
@@ -241,18 +226,15 @@ class AlayaLite(VectorStore):
                 doc_id if doc_id is not None else str(uuid.uuid4())
                 for doc_id in document_ids
             ]
-        
+
         # Use from_texts to create and populate the vector store
         return cls.from_texts(
-            texts=texts,
-            embedding=embedding,
-            metadatas=metadatas,
-            **kwargs
+            texts=texts, embedding=embedding, metadatas=metadatas, **kwargs
         )
 
     def delete(
         self,
-        ids: Optional[List[str]] = None,
+        ids: list[str] | None = None,
         **kwargs: Any,
     ) -> bool:
         """
@@ -281,8 +263,10 @@ class AlayaLite(VectorStore):
 
             # Case 1: Delete all vectors in current collection
             if ids is None and not has_filter:
-                logger.info(f"Deleting all vectors from collection: {self._collection_name}")
-                
+                logger.info(
+                    f"Deleting all vectors from collection: {self._collection_name}"
+                )
+
                 # Method 1: Delete and recreate collection
                 self._client.delete_collection(collection_name=self._collection_name)
                 self._collection = self._client.get_or_create_collection(
@@ -309,20 +293,17 @@ class AlayaLite(VectorStore):
                 hasattr(self._client, "save_collection")
                 and getattr(self._collection, "_Collection__index_py", None) is not None
             ):
-                self._client.save_collection(
-                    collection_name=self._collection_name
-                )
+                self._client.save_collection(collection_name=self._collection_name)
 
             return True
-
 
         except Exception:
             logger.exception("Error deleting vectors from AlayaLite")
             raise
 
     def similarity_search_by_vector(
-        self, embedding: List[float], k: int = 4, **kwargs: Any
-    ) -> List[Document]:
+        self, embedding: list[float], k: int = 4, **kwargs: Any
+    ) -> list[Document]:
         """Return docs most similar to embedding vector.
 
         Args:
@@ -338,8 +319,7 @@ class AlayaLite(VectorStore):
 
         if not getattr(self._collection, "_Collection__index_py", None):
             return []
-        
-        
+
         ef_search = kwargs.pop("ef_search", 10)
         num_threads = kwargs.pop("num_threads", 1)
         res = self._collection.batch_query(
@@ -352,14 +332,15 @@ class AlayaLite(VectorStore):
                 res["id"][0],
                 res["document"][0],
                 res["metadata"][0],
+                strict=True,
             )
         ]
 
-        return docs    
+        return docs
 
     def similarity_search(
         self, query: str, k: int = 4, **kwargs: Any
-    ) -> List[Document]:
+    ) -> list[Document]:
         """Return docs most similar to query.
 
         Args:
@@ -376,11 +357,10 @@ class AlayaLite(VectorStore):
 
         embeddings = self._embedding_function.embed_query(query)
         return self.similarity_search_by_vector(embedding=embeddings, k=k, **kwargs)
-    
+
     def similarity_search_with_score_by_vector(
-        self, embedding: List[float], k: int = 4, **kwargs: Any
-    ) -> List[Tuple[Document, float]]:
-        
+        self, embedding: list[float], k: int = 4, **kwargs: Any
+    ) -> list[tuple[Document, float]]:
         """Return docs most similar to embedding vector.
 
         Args:
@@ -393,7 +373,7 @@ class AlayaLite(VectorStore):
         Returns:
             List of Tuple(Document, float) most similar to the query vector.
         """
-        
+
         ef_search = kwargs.pop("ef_search", 10)
         num_threads = kwargs.pop("num_threads", 1)
         res = self._collection.batch_query(
@@ -406,16 +386,16 @@ class AlayaLite(VectorStore):
                 res["id"][0],
                 res["document"][0],
                 res["metadata"][0],
+                strict=True,
             )
         ]
 
         scores = [self._euclidean_relevance_score_fn(dis) for dis in res["distance"][0]]
-        return list(zip(docs, scores))
-    
+        return list(zip(docs, scores, strict=True))
+
     def similarity_search_with_score(
         self, query: str, k: int = 4, **kwargs: Any
-    ) -> List[Tuple[Document, float]]:
-        
+    ) -> list[tuple[Document, float]]:
         """Run similarity search with distance.
 
         Args:
@@ -428,18 +408,18 @@ class AlayaLite(VectorStore):
         Returns:
             List of Tuples of (doc, similarity_score).
         """
-        
+
         if self._collection is None:
             logger.debug("No collection found, returning empty list.")
             return []
 
         embedding = self._embedding_function.embed_query(query)
-        
+
         return self.similarity_search_with_score_by_vector(
             embedding=embedding, k=k, **kwargs
         )
-   
-    def get_by_ids(self, ids: Sequence[str], /) -> List[Document]:
+
+    def get_by_ids(self, ids: Sequence[str], /) -> list[Document]:
         """Get documents by their IDs.
 
         Args:
@@ -457,14 +437,14 @@ class AlayaLite(VectorStore):
             logger.warning(f"get_by_ids failed: {e}")
             return []
 
-        documents: List[Document] = []
+        documents: list[Document] = []
 
         for doc_id, content, metadata in zip(
             res.get("id", []),
             res.get("document", []),
             res.get("metadata", []),
+            strict=True,
         ):
-
             documents.append(
                 Document(
                     page_content=content,
@@ -472,7 +452,6 @@ class AlayaLite(VectorStore):
                     id=doc_id,
                 )
             )
-
 
         return documents
 
@@ -482,67 +461,92 @@ class AlayaLite(VectorStore):
 
         This method completely removes the collection and all its data.
         After calling this method, the internal collection reference will be None.
-        
+
         Note: The collection object will need to be recreated if you want to use it again.
         """
         try:
             if self._collection_name in self._client.list_collections():
                 self._client.delete_collection(collection_name=self._collection_name)
-                logger.info(f"Collection '{self._collection_name}' deleted successfully.")
-            
+                logger.info(
+                    f"Collection '{self._collection_name}' deleted successfully."
+                )
+
             # Reset the internal collection reference
             self._collection = None
-            
+
         except Exception as e:
             logger.error(f"Failed to delete collection '{self._collection_name}': {e}")
             raise
 
-
     @staticmethod
-    def _async_not_supported(self, method_name: str) -> None:
+    def _async_not_supported(method_name: str) -> None:
         """Raise NotImplementedError for async methods."""
         raise NotImplementedError(
             f"Async method '{method_name}' is not currently supported by AlayaLite. "
             f"Please use the synchronous version: '{method_name[1:]}()'. "
             f"Async support may be added in future versions."
         )
+
     @classmethod
-    async def afrom_texts(cls, *args, **kwargs) -> "AlayaLite":
+    async def afrom_texts(cls, *args: Any, **kwargs: Any) -> AlayaLite:  # type: ignore[misc]
         """Async from_texts - Not supported."""
         cls._async_not_supported("afrom_texts")
-    
-    async def aadd_texts(self, *args, **kwargs) -> List[str]:
+        raise NotImplementedError  # for type checker
+
+    async def aadd_texts(self, *args: Any, **kwargs: Any) -> list[str]:
         """Async add_texts - Not supported."""
         self._async_not_supported("aadd_texts")
-    
-    async def asimilarity_search(self, *args, **kwargs) -> List[Document]:
+        raise NotImplementedError  # for type checker
+
+    async def asimilarity_search(self, *args: Any, **kwargs: Any) -> list[Document]:
         """Async similarity_search - Not supported."""
         self._async_not_supported("asimilarity_search")
-    
-    async def asimilarity_search_by_vector(self, *args, **kwargs) -> List[Document]:
+        raise NotImplementedError  # for type checker
+
+    async def asimilarity_search_by_vector(
+        self, *args: Any, **kwargs: Any
+    ) -> list[Document]:
         """Async similarity_search_by_vector - Not supported."""
         self._async_not_supported("asimilarity_search_by_vector")
-        
-    async def asimilarity_search_with_score(self, *args, **kwargs) -> List[Tuple[Document, float]]:
+        raise NotImplementedError  # for type checker
+
+    async def asimilarity_search_with_score(
+        self, *args: Any, **kwargs: Any
+    ) -> list[tuple[Document, float]]:
         """Async similarity_search_with_score - Not supported."""
         self._async_not_supported("asimilarity_search_with_score")
-        
-    async def asimilarity_search_with_score_by_vector(self, *args, **kwargs) -> List[Tuple[Document, float]]:
+        raise NotImplementedError  # for type checker
+
+    async def asimilarity_search_with_score_by_vector(
+        self, *args: Any, **kwargs: Any
+    ) -> list[tuple[Document, float]]:
         """Async similarity_search_with_score_by_vector - Not supported."""
         self._async_not_supported("asimilarity_search_with_score_by_vector")
-    
-    async def aget_by_ids(self, *args, **kwargs) -> List[Document]:
+        raise NotImplementedError  # for type checker
+
+    async def aget_by_ids(self, *args: Any, **kwargs: Any) -> list[Document]:
         """Async get_by_ids - Not supported."""
         self._async_not_supported("aget_by_ids")
-        
-    async def adelete(self, *args, **kwargs) -> bool:   
+        raise NotImplementedError  # for type checker
+
+    async def adelete(self, *args: Any, **kwargs: Any) -> bool:
         """Async delete - Not supported."""
         self._async_not_supported("adelete")
-        
-    @classmethod
-    async def afrom_documents(cls, *args, **kwargs) -> "AlayaLite":
-        cls._async_not_supported("afrom_documents")
+        raise NotImplementedError  # for type checker
 
-        
-    def max_marginal_relevance_search(**kwargs: Any) -> List[Document]:
+    @classmethod
+    async def afrom_documents(cls, *args: Any, **kwargs: Any) -> AlayaLite:  # type: ignore[misc]
+        """Async from_documents - Not supported."""
+        cls._async_not_supported("afrom_documents")
+        raise NotImplementedError  # for type checker
+
+    def max_marginal_relevance_search(
+        self,
+        query: str,
+        k: int = 4,
+        fetch_k: int = 20,
+        lambda_mult: float = 0.5,
+        **kwargs: Any,
+    ) -> list[Document]:
+        """Maximum marginal relevance search - Not yet supported."""
         raise NotImplementedError("MMR is not yet supported...")

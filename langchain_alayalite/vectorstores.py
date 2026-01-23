@@ -63,33 +63,7 @@ class AlayaLite(VectorStore):
             if collection_name in self._client.list_collections():
                 self._client.delete_collection(collection_name=collection_name)
 
-        self._collection = self._client.get_or_create_collection(name=collection_name)
-
-
-
-    @property
-    def embeddings(self) -> Optional[Embeddings]:
-        return self._embedding_function
-    @property
-    def client(self) -> Client:
-        return self._client
-    @property
-    def collection(self):
-        return self._collection
-    @property
-    def collection_name(self) -> str:
-        return self._collection_name
-    @property
-    def index_params(self) -> Dict[str, Any]:
-        return self._index_params
-    @property
-    def search_params(self) -> Dict[str, Any]:
-        return self._search_params
-    @property
-    def persist_directory(self) -> str:
-        return self._url
-    
-    
+        self._collection = self._client.get_or_create_collection(name=collection_name) 
     
     def add_texts(
         self,
@@ -453,7 +427,7 @@ class AlayaLite(VectorStore):
         return documents
 
 
-
+'''
     @staticmethod
     def _async_not_supported(self, method_name: str) -> None:
         """Raise NotImplementedError for async methods."""
@@ -504,4 +478,4 @@ class AlayaLite(VectorStore):
         """Async from_documents - Not supported."""
         cls._async_not_supported("afrom_documents")
         
-    
+'''

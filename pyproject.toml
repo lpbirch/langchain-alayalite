@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "langchain-alayalite"
+version = "0.1.0"
+description = "LangChain VectorStore integration for AlayaLite"
+readme = "README.md"
+requires-python = ">=3.10,<4.0"
+
+authors = [
+    { name = "lpbirch", email = "wantmytearsback@qq.com" }
+]
+
+license = { text = "MIT" }
+
+dependencies = [
+    "langchain-core>=1.0.0,<2.0.0",
+    "alayalite>=0.1",
+]
+
+
+[project.urls]
+Homepage = "https://github.com/lpbirch/langchain-alayalite"
+Source = "https://github.com/lpbirch/langchain-alayalite"
+Issues = "https://github.com/lpbirch/langchain-alayalite/issues"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["langchain_alayalite"]
+
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "langchain_alayalite",
+    "README.md",
+    "pyproject.toml",
+]
+
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["tests"]

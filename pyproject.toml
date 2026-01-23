@@ -19,7 +19,7 @@ authors = [
 
 dependencies = [
     "langchain-core>=1.0.0",
-    "alayalite",
+    "alayalite==0.1.0a3",
 ]
 
 classifiers = [
@@ -29,6 +29,11 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
 ]
 
 [project.urls]
@@ -45,3 +50,8 @@ include = ["langchain_alayalite*"]
 
 [tool.setuptools.package-data]
 langchain_alayalite = ["py.typed"]
+
+[tool.pytest.ini_options]
+markers = [
+    "requires: mark test as requiring a specific package",
+]

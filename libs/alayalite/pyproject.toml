@@ -1,0 +1,57 @@
+[build-system]
+requires = [
+    "setuptools>=64",
+    "wheel",
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "langchain-alayalite"
+version = "0.1.0"
+description = "LangChain VectorStore integration for AlayaLite"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10,<4.0"
+
+authors = [
+    { name = "lpbirch", email = "wantmytearsback@qq.com" }
+]
+
+dependencies = [
+    "langchain-core>=1.0.0",
+    "alayalite==0.1.0a3",
+]
+
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+]
+
+[dependency-groups]
+dev = [
+    "pytest",
+]
+
+[project.urls]
+Homepage = "https://github.com/lpbirch/langchain-alayalite"
+Source = "https://github.com/lpbirch/langchain-alayalite"
+Issues = "https://github.com/lpbirch/langchain-alayalite/issues"
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["langchain_alayalite*"]
+
+[tool.setuptools.package-data]
+langchain_alayalite = ["py.typed"]
+
+[tool.pytest.ini_options]
+markers = [
+    "requires: mark test as requiring a specific package",
+]

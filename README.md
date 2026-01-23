@@ -1,10 +1,10 @@
 # langchain-alayalite
 
-`langchain-alayalite` is a LangChain partner package that integrates **AlayaLite** as a lightweight vector database backend.
+`langchain-alayalite` is an official LangChain partner integration that connects **AlayaLite**, a high-performance lightweight vector database, with the **LangChain** ecosystem.
 
-It provides a native `VectorStore` implementation fully compatible with **LangChain Core**, enabling seamless usage of **AlayaLite** inside the LangChain ecosystem for vector storage, similarity search, and retrieval workflows.
+It provides a native **VectorStore** implementation fully compatible with **langchain-core**, enabling seamless usage of **AlayaLite** for vector storage, similarity search, and retrieval workflows in modern LLM-powered applications.
 
-This project is officially maintained by members of the **AlayaLite team**, with the primary goal of promoting **AlayaLite** as a high-performance, lightweight vector database solution for AI applications.
+This project is officially maintained by members of the **AlayaLite team**, with the primary goal of promoting **AlayaLite** as a production-ready, lightweight, and high-performance vector database solution.
 
 ---
 
@@ -12,57 +12,60 @@ This project is officially maintained by members of the **AlayaLite team**, with
 
 **AlayaLite** is a lightweight vector database designed for efficient embedding storage, similarity search, and retrieval workloads, optimized for simplicity, performance, and developer friendliness.
 
-* GitHub Repository:
-  [https://github.com/AlayaDB-AI/AlayaLite.git](https://github.com/AlayaDB-AI/AlayaLite.git)
+**GitHub Repository:** https://github.com/AlayaDB-AI/AlayaLite
 
-* Key characteristics:
+### Key Features
 
-  * Lightweight deployment
-  * Fast vector indexing & search
-  * Simple API design
-  * Optimized for LLM & RAG scenarios
-  * Easy integration with LangChain
+- **High Performance**: Optimized vector indexing and search pipeline.
+- **Elastic Scalability**: Multi-threaded design powered by C++20 coroutines.
+- **Adaptive Flexibility**: Pluggable quantization strategies, metrics, and data types.
+- **Ease of Use**: Intuitive Python APIs with minimal configuration.
+- **Low Resource Overhead**: Designed for lightweight deployments.
 
 ---
 
 ## About LangChain
 
-**LangChain** is a widely used framework for building applications powered by large language models (LLMs), providing modular components for:
+**LangChain** is a widely used framework for building applications powered by large language models (LLMs), providing modular components for prompt engineering, chains and agents, memory systems, Retrieval-Augmented Generation (RAG), and vector database integrations.
 
-* Prompt engineering
-* Chains and agents
-* Memory systems
-* Retrieval-Augmented Generation (RAG)
-* Vector database integrations
+**Official Website:** https://www.langchain.com/
 
-Official website:
-[https://www.langchain.com/](https://www.langchain.com/)
+**GitHub Repository:** https://github.com/langchain-ai/langchain
 
 ---
 
 ## Features
 
-* Native **LangChain VectorStore** implementation
-* Fully compatible with `langchain-core`
-* Supports:
-
-  * `add_documents`
-  * `add_texts`
-  * `similarity_search`
-  * `similarity_search_with_score`
-* Passes **LangChain official standard integration tests**
-* Simple API, easy configuration
-* Designed for high performance and low overhead
+- Native **LangChain VectorStore** implementation
+- Fully compatible with **langchain-core**
+- Supports:
+  - `add_documents`
+  - `add_texts`
+  - `similarity_search`
+  - `similarity_search_with_score`
+  - `get_by_ids`
+  - `from_texts`
+  - `from_documents`
+- Passes **LangChain official standard integration test suite**
+- Simple configuration, production-ready API
+- High-performance, low-overhead backend
 
 ---
 
-## Current Status
+## Current Status & Limitations
 
-* Passed **LangChain official standard test suite**
-* Core synchronous APIs fully supported
-* Asynchronous APIs are **not fully supported yet**
+- ✅ All **synchronous APIs** are fully supported.
+- ✅ Passes **LangChain official standard test suite** (except async tests).
+- ❌ **Asynchronous APIs are not fully supported yet**
+- ❌ **MMR (Maximal Marginal Relevance) retrieval is currently unavailable**
 
-> Async method support is currently under development and will be released in upcoming versions.
+### Notes
+
+Due to current limitations in the underlying `AlayaLite` storage engine, **asynchronous execution and MMR retrieval are temporarily unavailable**.
+
+These features are actively under development and planned for upcoming releases.
+
+> Except for async-related tests, **all LangChain official standard integration tests pass successfully**, ensuring correctness, consistency, and compatibility.
 
 ---
 
@@ -74,59 +77,66 @@ Install from PyPI:
 pip install langchain-alayalite
 ```
 
+For development mode:
+
+```bash
+pip install -e .
+```
+
 ---
 
 ## Quick Start
 
+Below is a complete working example using **OpenAI embeddings**.
+
 ```python
 from langchain_alayalite import AlayaLite
 from langchain_core.documents import Document
+from langchain_openai import OpenAIEmbeddings
 
+# Initialize embedding model
+embeddings = OpenAIEmbeddings()
+
+# Create vector store
 vectorstore = AlayaLite(
-    persist_path="./alayalite_data"
+    embedding=embeddings,
+    persist_directory="./alayalite_data"  # Optional: persist data to disk
 )
 
+# Prepare documents
 docs = [
-    Document(page_content="LangChain makes LLM applications easy."),
-    Document(page_content="AlayaLite is a lightweight vector database.")
+    Document(page_content="LangChain makes building LLM applications easy."),
+    Document(page_content="AlayaLite is a high-performance lightweight vector database."),
+    Document(page_content="Vector databases enable fast semantic similarity search.")
 ]
 
+# Add documents
 vectorstore.add_documents(docs)
 
-results = vectorstore.similarity_search("vector database", k=2)
+# Perform similarity search
+results = vectorstore.similarity_search("lightweight vector database", k=2)
 
 for doc in results:
     print(doc.page_content)
 ```
 
----
+### Example Output
 
-## Why AlayaLite?
-
-Compared with traditional vector databases, **AlayaLite focuses on lightweight design and simplicity**, making it ideal for:
-
-* Local development
-* Edge deployment
-* Lightweight RAG systems
-* Rapid prototyping
-* Small to medium-scale vector workloads
-
----
-
-## Roadmap
-
-* [ ] Full async API support
-* [ ] Advanced indexing strategies
-* [ ] Distributed mode
-* [ ] Hybrid search (vector + keyword)
-* [ ] Performance benchmarking release
+```
+AlayaLite is a high-performance lightweight vector database.
+Vector databases enable fast semantic similarity search.
+```
 
 ---
 
 ## Contributing
 
-Contributions are welcome!
-Feel free to open issues or pull requests on GitHub:
+Contributions, issues, and feature requests are welcome!
 
-[https://github.com/AlayaDB-AI/AlayaLite.git](https://github.com/AlayaDB-AI/AlayaLite.git)
+Please open issues or pull requests at: https://github.com/AlayaDB-AI/AlayaLite
 
+---
+
+## License
+
+MIT

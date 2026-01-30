@@ -26,21 +26,33 @@ resolution-markers = [
 
 [[package]]
 name = "alayalite"
-version = "0.1.0a3"
+version = "0.1.1a1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pandas", version = "2.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "pandas", version = "3.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
 ]
+sdist = { url = "https://files.pythonhosted.org/packages/11/0d/063251bfc04460bb64d6e23e707b2468bd558450c8875ef2e9855ae4de69/alayalite-0.1.1a1.tar.gz", hash = "sha256:ec6f82e543daacf90aa2eba6ef85db2c1562cbcea9cba13e27612247d1722239", size = 1621438, upload-time = "2026-01-27T07:26:05.385Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/89/cc/d09b6561c1b5c14cdbd0290d847d1f65273737ee22973b80588e2880c501/alayalite-0.1.0a3-cp310-cp310-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:b5abb407fb3d569814d77785eb6859fbb7a19f2dcf73a9a3162448cd188954cf", size = 1086663, upload-time = "2026-01-23T02:41:39.344Z" },
-    { url = "https://files.pythonhosted.org/packages/0e/19/31137c0fe1cef9d9cbc6b925def24286f3b8d12e4df26c563f42b240ca8b/alayalite-0.1.0a3-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:cd6353666afe83e943f0b55c7987e42a14a25d407548887445ab31b5813b66d2", size = 1381913, upload-time = "2026-01-23T02:41:41.924Z" },
-    { url = "https://files.pythonhosted.org/packages/b6/cb/b76ac8758e20a78acab6673b89842faa3a874d7647380d1d218e42e1c77f/alayalite-0.1.0a3-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:8b85760e75ceae7339678d9c66f6fe4240224e9af952f4ed09a719c60ba6b758", size = 1089031, upload-time = "2026-01-23T02:41:43.537Z" },
-    { url = "https://files.pythonhosted.org/packages/66/07/24581a78f7f7b1a16f13eb76fd34b5bc35f8fc627d4738ec3387fc1fc6ea/alayalite-0.1.0a3-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:8b641d1eb06c43c45987b74674fd12558f3c5ff62b22121067fa23efe8db10b7", size = 1381522, upload-time = "2026-01-23T02:41:46.804Z" },
-    { url = "https://files.pythonhosted.org/packages/5f/66/c93f0448b5845660915bc5ea0b8e573ef4ca62b7483de8e5754854aba8e8/alayalite-0.1.0a3-cp312-cp312-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:6e30dd18db3302bffcc851f743328009c26bf14a421505ab50994626252e0a34", size = 1087689, upload-time = "2026-01-23T02:41:48.635Z" },
-    { url = "https://files.pythonhosted.org/packages/2e/7a/fa3c61598e8c4ffc4f5a5cabd56ceea604a3ab42fcf5baddafc0b3309c0f/alayalite-0.1.0a3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:59b8a276ca9ada8288a32b42a7153e593b1500c85f6825297980c073d72295ed", size = 1383469, upload-time = "2026-01-23T02:41:50.246Z" },
-    { url = "https://files.pythonhosted.org/packages/59/60/51dfc8ebf908b93fd7839ed0f835de503af03428b6bdc9e7ececf17edd29/alayalite-0.1.0a3-cp313-cp313-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:cfce5c7462cedb77ef63dfe3107316af67ff2ff63ae64de20178ca2361d4a240", size = 1088203, upload-time = "2026-01-23T02:41:52.63Z" },
-    { url = "https://files.pythonhosted.org/packages/90/36/40e6395e9138276973b22111180c0d46d747bdef138beb8303b63892ee4d/alayalite-0.1.0a3-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:42638e81a1b4fb7d333df78b5c20f55a3e51ebf36ca02f021d85fb9cebd27d13", size = 1384433, upload-time = "2026-01-23T02:41:54.864Z" },
+    { url = "https://files.pythonhosted.org/packages/a4/fd/67f5910a2344a7cca38ca64b783716a9dc3b7abfc493d825754e63eea4bc/alayalite-0.1.1a1-cp310-cp310-macosx_14_0_arm64.whl", hash = "sha256:0593dd4c95705cf0f432a77459de4eb3998172b78b36e26681e002b9db4a7306", size = 949943, upload-time = "2026-01-30T03:26:53.141Z" },
+    { url = "https://files.pythonhosted.org/packages/ea/9b/96b1e4aadb7250492664868ed86b5c3da2e78e27fbcf7dfada3c74f7a427/alayalite-0.1.1a1-cp310-cp310-macosx_14_0_x86_64.whl", hash = "sha256:3be16d7ff9e1a1c8a5b8b12f32e090bc2deaeed8802da31c5f0a52b87e1c5dff", size = 1220719, upload-time = "2026-01-30T03:26:56.319Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/a7/ffd9591c1b9fd2d4ed572eb8f48db7b2321acb2d1c87a4b467005a33c357/alayalite-0.1.1a1-cp310-cp310-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:f967bb78bbe296579d6ae493a497d97f2ef866157eca2389121b849d12e514d8", size = 865537, upload-time = "2026-01-30T03:26:58.848Z" },
+    { url = "https://files.pythonhosted.org/packages/de/38/84b7ad2d5fae7b78668d040cec73a5660eaa7f5486fb2667dd279b01eb53/alayalite-0.1.1a1-cp310-cp310-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:5f7d3c73e1990e1b8d010d7855c878e4374d7a8911d2b754767564b0c48c645b", size = 1126244, upload-time = "2026-01-30T03:27:01.501Z" },
+    { url = "https://files.pythonhosted.org/packages/5b/67/7dc7cc458aaf7eb80f9fa1502bee6c624e294e45a6e50d1fd23eb2b120bc/alayalite-0.1.1a1-cp311-cp311-macosx_14_0_arm64.whl", hash = "sha256:29960665385c96afd6a7c0e07f44dd73bc103a32fbf943183110b85798cfc295", size = 951528, upload-time = "2026-01-30T03:27:04.41Z" },
+    { url = "https://files.pythonhosted.org/packages/32/b3/9f60ded60ad0a6e6793f0958b7719b26b02be40a9233dc073446f22ff616/alayalite-0.1.1a1-cp311-cp311-macosx_14_0_x86_64.whl", hash = "sha256:3a618392d53302a5ab616dffcf80cdfe83311d0ecb2dbe3c8e3b0a6469498c3a", size = 1222718, upload-time = "2026-01-30T03:27:07.202Z" },
+    { url = "https://files.pythonhosted.org/packages/cc/e2/e91f43252d16ebed2ec0a6d2ef22d6171f8278ea63414ac34d797cbe447f/alayalite-0.1.1a1-cp311-cp311-macosx_26_0_arm64.whl", hash = "sha256:49f60992cb02d335236ca41f7e762ff2f9a1eb5542863a29c3539808ee722c5d", size = 676848, upload-time = "2026-01-27T07:26:02.098Z" },
+    { url = "https://files.pythonhosted.org/packages/21/ca/8c936adeb1a6ea13bb3c6c7fa023d6f33a3866bb62fee94e0155ad299e67/alayalite-0.1.1a1-cp311-cp311-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5135022f8bdf089d6ee0852ac6b634769c5a4d85c8b0dba1d1b763140e5d74ff", size = 865960, upload-time = "2026-01-30T03:27:08.901Z" },
+    { url = "https://files.pythonhosted.org/packages/d6/11/25881c8ce93d4e2120bf8ca2c661ab5605d9d9454152b2b7e8329bca9895/alayalite-0.1.1a1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:b4fe1650d5fbc4220e95bdad3524a1bca35127301cc1e9efc61930349ddd9664", size = 1127303, upload-time = "2026-01-30T03:27:11.021Z" },
+    { url = "https://files.pythonhosted.org/packages/50/93/47586724772385393631ac19dc23c1818da326ca8505363428f42b2dba71/alayalite-0.1.1a1-cp311-cp311-win_amd64.whl", hash = "sha256:dffe0b27c189aea998ae0c1f186c92d943de4ec17d0cc00535806916de56c853", size = 580337, upload-time = "2026-01-28T09:40:28.535Z" },
+    { url = "https://files.pythonhosted.org/packages/ef/65/f69507c1c55ff25f101702c2f93605c8b2211dafb030e4f055047b35626b/alayalite-0.1.1a1-cp312-cp312-macosx_14_0_arm64.whl", hash = "sha256:abebf0802fca37b04d2db4a5d5e3808f43d8e24f9fc19b8e4e77b5b86335640a", size = 950842, upload-time = "2026-01-30T03:27:12.632Z" },
+    { url = "https://files.pythonhosted.org/packages/7c/80/6dddfea52b3af2824f9777583ffa354acaa7b189d8eed557f15a72359432/alayalite-0.1.1a1-cp312-cp312-macosx_14_0_x86_64.whl", hash = "sha256:624eaa39286d44d320de10b5ee6c750746392b96d6dab11c69646111247af963", size = 1225462, upload-time = "2026-01-30T03:27:15.047Z" },
+    { url = "https://files.pythonhosted.org/packages/10/05/733f0333583b25c82c84c9b6a6f3463315209ffaf440ef5547ae1c3f7f5b/alayalite-0.1.1a1-cp312-cp312-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:5bb08749ec588c6c93c64a54affa7123004b56b229ecd923b9b443ac224861fb", size = 862183, upload-time = "2026-01-30T03:27:16.521Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/08/2e1b5cf6c3c19a20c25a8d8073b877eefa45d2571b7c5858c24845979211/alayalite-0.1.1a1-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:9599727b06e66598f700cc92975df9653ec8597daff04f3790a3df1bd4342bda", size = 1123883, upload-time = "2026-01-30T03:27:18.089Z" },
+    { url = "https://files.pythonhosted.org/packages/d0/64/8b06f976feb6eb555ebd5c22d43f2e5a4ff2551616c537e40ba39eb99d64/alayalite-0.1.1a1-cp313-cp313-macosx_14_0_arm64.whl", hash = "sha256:cfb74737a6666dc5a94e54aeccb0bc778b7481cd4db0fdd49d3dc27a949acf52", size = 950891, upload-time = "2026-01-30T03:27:19.565Z" },
+    { url = "https://files.pythonhosted.org/packages/43/fd/2b206aaa7fd50df70a770018b2f7e9ca1a86f88639c590a46eb5bad6a13c/alayalite-0.1.1a1-cp313-cp313-macosx_14_0_x86_64.whl", hash = "sha256:f470a3400570eea2d7eee367e7227f059ae1f811129b873fc5e24fad31160bdc", size = 1225504, upload-time = "2026-01-30T03:27:21.549Z" },
+    { url = "https://files.pythonhosted.org/packages/46/c3/d1609f84889ffcf48f5c2b4df9239b222e84c5aefddb2dddc7d32b4e1734/alayalite-0.1.1a1-cp313-cp313-macosx_26_0_arm64.whl", hash = "sha256:fed5f2f168ecee7bc378b6b682d06b1ad10e7626a62aa2a1f2873e17bab94104", size = 677915, upload-time = "2026-01-27T07:26:03.693Z" },
+    { url = "https://files.pythonhosted.org/packages/3e/38/f2174048b1b1e595777b62fe7d6c97aeec9fe1d325bc993f35ee7a06f1d8/alayalite-0.1.1a1-cp313-cp313-manylinux_2_26_aarch64.manylinux_2_28_aarch64.whl", hash = "sha256:e8172e2767ac9bf04f7906a2dfab34056ba054a39f80787d0fffd467b444a194", size = 863147, upload-time = "2026-01-30T03:27:23.294Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/51/ebc1193abe2672a1a5b2138f750bbc8cdd7be4bccaa5db29f3049e07a73c/alayalite-0.1.1a1-cp313-cp313-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl", hash = "sha256:bb960330f51ab32b3bb67ecfec0b8dbb0f12e9e778e740f3e7e2486daff86098", size = 1125578, upload-time = "2026-01-30T03:27:25.389Z" },
 ]
 
 [[package]]
@@ -373,7 +385,7 @@ name = "exceptiongroup"
 version = "1.3.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/50/79/66800aadf48771f6b62f7eb014e352e5d06856655206165d775e675a02c9/exceptiongroup-1.3.1.tar.gz", hash = "sha256:8b412432c6055b0b7d14c310000ae93352ed6754f70fa8f7c34141f91c4e3219", size = 30371, upload-time = "2025-11-21T23:01:54.787Z" }
 wheels = [
@@ -488,7 +500,7 @@ typing = [
 
 [package.metadata]
 requires-dist = [
-    { name = "alayalite", specifier = "==0.1.0a3" },
+    { name = "alayalite", specifier = ">=0.1.1a1" },
     { name = "langchain-core", specifier = ">=1.0.0" },
 ]
 

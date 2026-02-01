@@ -30,9 +30,15 @@ jobs:
           python-version: '3.11'
       - id: files
         uses: Ana06/get-changed-files@v2.2.0
+        continue-on-error: true
       - id: set-matrix
         run: |
-          python .github/scripts/check_diff.py ${{ steps.files.outputs.all }} >> $GITHUB_OUTPUT
+          if [ -z "${{ steps.files.outputs.all }}" ]; then
+            # Force push or no common ancestor - run all checks
+            python .github/scripts/check_diff.py "libs/alayalite" >> $GITHUB_OUTPUT
+          else
+            python .github/scripts/check_diff.py ${{ steps.files.outputs.all }} >> $GITHUB_OUTPUT
+          fi
     outputs:
       dirs-to-lint: ${{ steps.set-matrix.outputs.dirs-to-lint }}
       dirs-to-test: ${{ steps.set-matrix.outputs.dirs-to-test }}

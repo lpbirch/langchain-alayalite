@@ -1,10 +1,12 @@
 import uuid
 from collections.abc import Generator
 
+import numpy as np
 import pytest
 from langchain_core.documents import Document
 from langchain_core.embeddings import DeterministicFakeEmbedding
 from langchain_core.vectorstores import VectorStore
+from langchain_core.vectorstores.utils import maximal_marginal_relevance
 
 from langchain_alayalite.vectorstores import AlayaLite
 
@@ -316,12 +318,6 @@ def test_add_documents_with_existing_ids(vectorstore: VectorStore) -> None:
         ]
     )
 
-
-
-import numpy as np
-from langchain_core.vectorstores.utils import maximal_marginal_relevance
-
-
 def test_max_marginal_relevance_search_matches_langchain_core(vectorstore: VectorStore, embeddings) -> None:
     # Arrange: 构造一组文档（数量 >= fetch_k）
     docs = [
@@ -332,7 +328,7 @@ def test_max_marginal_relevance_search_matches_langchain_core(vectorstore: Vecto
         Document(page_content="echo", metadata={"i": 4}),
         Document(page_content="foxtrot", metadata={"i": 5}),
     ]
-    ids = vectorstore.add_documents(docs)
+    vectorstore.add_documents(docs)
 
     query = "alpha"
     k = 3

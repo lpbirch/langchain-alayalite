@@ -17,7 +17,6 @@ __all__ = ["AlayaLite"]
 logger = logging.getLogger(__name__)
 
 
-
 class AlayaLite(VectorStore):
     def __init__(
         self,

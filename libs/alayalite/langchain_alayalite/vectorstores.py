@@ -1,20 +1,21 @@
 from __future__ import annotations
 
-__all__ = ["AlayaLite"]
-
 import logging
 import uuid
 from collections.abc import Iterable, Sequence
 from itertools import cycle
 from typing import Any
 
-import numpy as np #add newed import
+import numpy as np
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
 from langchain_core.vectorstores.utils import maximal_marginal_relevance
 
+__all__ = ["AlayaLite"]
+
 logger = logging.getLogger(__name__)
+
 
 
 class AlayaLite(VectorStore):

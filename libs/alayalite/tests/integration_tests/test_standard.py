@@ -318,7 +318,10 @@ def test_add_documents_with_existing_ids(vectorstore: VectorStore) -> None:
         ]
     )
 
-def test_max_marginal_relevance_search_matches_langchain_core(vectorstore: VectorStore, embeddings) -> None:
+
+def test_max_marginal_relevance_search_matches_langchain_core(
+    vectorstore: VectorStore, embeddings
+) -> None:
     # Arrange: 构造一组文档（数量 >= fetch_k）
     docs = [
         Document(page_content="alpha", metadata={"i": 0}),

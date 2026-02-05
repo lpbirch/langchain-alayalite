@@ -20,6 +20,7 @@ authors = [
 dependencies = [
     "langchain-core>=1.0.0",
     "alayalite>=0.1.1a1",
+    "numpy",
 ]
 
 classifiers = [

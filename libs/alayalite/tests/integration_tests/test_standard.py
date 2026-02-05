@@ -315,3 +315,142 @@ def test_add_documents_with_existing_ids(vectorstore: VectorStore) -> None:
             Document(page_content="bar", metadata={"id": 2}, id=ids[1]),
         ]
     )
+
+
+
+import numpy as np
+from langchain_core.vectorstores.utils import maximal_marginal_relevance
+
+
+def test_max_marginal_relevance_search_matches_langchain_core(vectorstore: VectorStore, embeddings) -> None:
+    # Arrange: 构造一组文档（数量 >= fetch_k）
+    docs = [
+        Document(page_content="alpha", metadata={"i": 0}),
+        Document(page_content="bravo", metadata={"i": 1}),
+        Document(page_content="charlie", metadata={"i": 2}),
+        Document(page_content="delta", metadata={"i": 3}),
+        Document(page_content="echo", metadata={"i": 4}),
+        Document(page_content="foxtrot", metadata={"i": 5}),
+    ]
+    ids = vectorstore.add_documents(docs)
+
+    query = "alpha"
+    k = 3
+    fetch_k = 5
+    lambda_mult = 0.5
+
+    # Act: 调用被测 MMR
+    mmr_docs = vectorstore.max_marginal_relevance_search(
+        query=query,
+        k=k,
+        fetch_k=fetch_k,
+        lambda_mult=lambda_mult,
+    )
+
+    # Assert: 1) 长度正确 2) 都来自候选集 3) 顺序与 langchain-core MMR 一致
+    assert len(mmr_docs) == k
+
+    # 候选集：与实现逻辑对齐（先相似检索，再 MMR）
+    candidates = vectorstore.similarity_search(query, k=fetch_k)
+    assert len(candidates) == fetch_k
+
+    # 取候选 id，并用 collection.get_embeddings_by_id 拉候选向量
+    candidate_ids = [d.id for d in candidates]
+    assert all(candidate_ids)  # 不应为 None/空
+
+    # 这里使用你新增的接口（MMR 必需）
+    candidate_embeddings = vectorstore._collection.get_embeddings_by_id(candidate_ids)  # type: ignore[attr-defined]
+    assert len(candidate_embeddings) == fetch_k
+
+    query_embedding = embeddings.embed_query(query)
+
+    expected_idx = maximal_marginal_relevance(
+        query_embedding=np.asarray(query_embedding, dtype=np.float32),
+        embedding_list=candidate_embeddings,
+        lambda_mult=lambda_mult,
+        k=k,
+    )
+    expected_docs = [candidates[i] for i in expected_idx]
+
+    assert mmr_docs == expected_docs
+
+
+def test_max_marginal_relevance_search_k_zero(vectorstore: VectorStore) -> None:
+    vectorstore.add_documents([Document(page_content="foo")])
+    assert vectorstore.max_marginal_relevance_search("foo", k=0, fetch_k=10) == []
+
+
+def test_max_marginal_relevance_search_k_gt_fetch_k(vectorstore: VectorStore) -> None:
+    vectorstore.add_documents(
+        [
+            Document(page_content="a"),
+            Document(page_content="b"),
+            Document(page_content="c"),
+        ]
+    )
+
+    # k > fetch_k 时，期望返回不超过 fetch_k 的数量（通常是 min(k, fetch_k)）
+    res = vectorstore.max_marginal_relevance_search("a", k=10, fetch_k=2)
+    assert len(res) == 2
+
+
+def test_max_marginal_relevance_search_by_vector_matches_langchain_core(
+    vectorstore: VectorStore,
+    embeddings,
+) -> None:
+    # Arrange
+    docs = [
+        Document(page_content="alpha", metadata={"i": 0}),
+        Document(page_content="bravo", metadata={"i": 1}),
+        Document(page_content="charlie", metadata={"i": 2}),
+        Document(page_content="delta", metadata={"i": 3}),
+        Document(page_content="echo", metadata={"i": 4}),
+        Document(page_content="foxtrot", metadata={"i": 5}),
+    ]
+    vectorstore.add_documents(docs)
+
+    query = "alpha"
+    query_embedding = embeddings.embed_query(query)
+
+    k = 3
+    fetch_k = 5
+    lambda_mult = 0.5
+
+    # Act: 被测方法（by_vector）
+    mmr_docs = vectorstore.max_marginal_relevance_search_by_vector(
+        embedding=query_embedding,
+        k=k,
+        fetch_k=fetch_k,
+        lambda_mult=lambda_mult,
+    )
+
+    # Assert: 数量正确
+    assert len(mmr_docs) == k
+
+    # 1) 先按实现逻辑取候选
+    candidates = vectorstore.similarity_search_by_vector(
+        embedding=query_embedding,
+        k=fetch_k,
+    )
+    assert len(candidates) == fetch_k
+
+    # 2) 拉候选 embedding（使用你在 Collection 中新增的接口）
+    candidate_ids = [d.id for d in candidates]
+    assert all(candidate_ids)
+
+    candidate_embeddings = vectorstore._collection.get_embeddings_by_id(  # type: ignore[attr-defined]
+        candidate_ids
+    )
+    assert len(candidate_embeddings) == fetch_k
+
+    # 3) 用 langchain-core 的 MMR 算期望顺序
+    expected_indices = maximal_marginal_relevance(
+        query_embedding=np.asarray(query_embedding, dtype=np.float32),
+        embedding_list=candidate_embeddings,
+        lambda_mult=lambda_mult,
+        k=k,
+    )
+    expected_docs = [candidates[i] for i in expected_indices]
+
+    # 4) 顺序必须完全一致
+    assert mmr_docs == expected_docs

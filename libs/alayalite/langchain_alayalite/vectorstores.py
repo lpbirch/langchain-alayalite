@@ -9,6 +9,8 @@ from itertools import cycle
 from typing import (
     Any,
 )
+import numpy as np #add newed import
+from langchain_core.vectorstores.utils import maximal_marginal_relevance
 
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
@@ -548,5 +550,93 @@ class AlayaLite(VectorStore):
         lambda_mult: float = 0.5,
         **kwargs: Any,
     ) -> list[Document]:
-        """Maximum marginal relevance search - Not yet supported."""
-        raise NotImplementedError("MMR is not yet supported...")
+        """Return docs selected using maximal marginal relevance (MMR)."""
+        if k <= 0:
+            return []
+
+        if self._collection is None:
+            return []
+
+        # collection 内部 index 未初始化时，batch_query 会 assert，这里提前拦一下
+        if not getattr(self._collection, "_Collection__index_py", None):
+            return []
+
+        # 1) embed query
+        query_embedding = self._embedding_function.embed_query(query)
+
+        # 2) 先做一次普通相似检索，取 fetch_k 个候选
+        #    注意：这里调用 by_vector，避免重复 embed
+        candidates = self.similarity_search_by_vector(
+            embedding=query_embedding,
+            k=fetch_k,
+            **kwargs,
+        )
+        if not candidates:
+            return []
+
+        # 3) 拉取候选向量（按 candidates 顺序对齐）
+        candidate_ids = [d.id for d in candidates if d.id is not None]
+        if not candidate_ids:
+            return []
+
+        try:
+            candidate_embeddings = self._collection.get_embeddings_by_id(candidate_ids)
+        except Exception as e:
+            logger.warning(f"get_embeddings_by_id failed: {e}")
+            return []
+
+        if not candidate_embeddings:
+            return []
+
+        # 4) MMR 选择（返回的是 candidate_embeddings 的下标）
+        mmr_indices = maximal_marginal_relevance(
+            query_embedding=np.asarray(query_embedding, dtype=np.float32),
+            embedding_list=candidate_embeddings,
+            lambda_mult=lambda_mult,
+            k=min(k, len(candidate_embeddings)),
+        )
+
+        # 5) 按 MMR 顺序返回文档
+        return [candidates[i] for i in mmr_indices]
+    
+    
+    def max_marginal_relevance_search_by_vector(
+        self,
+        embedding: list[float],
+        k: int = 4,
+        fetch_k: int = 20,
+        lambda_mult: float = 0.5,
+        **kwargs: Any,
+    ) -> list[Document]:
+        if k <= 0:
+            return []
+        if self._collection is None:
+            return []
+        if not getattr(self._collection, "_Collection__index_py", None):
+            return []
+
+        candidates = self.similarity_search_by_vector(
+            embedding=embedding,
+            k=fetch_k,
+            **kwargs,
+        )
+        if not candidates:
+            return []
+
+        candidate_ids = [d.id for d in candidates if d.id is not None]
+        if not candidate_ids:
+            return []
+
+        try:
+            candidate_embeddings = self._collection.get_embeddings_by_id(candidate_ids)
+        except Exception as e:
+            logger.warning(f"get_embeddings_by_id failed: {e}")
+            return []
+
+        mmr_indices = maximal_marginal_relevance(
+            query_embedding=np.asarray(embedding, dtype=np.float32),
+            embedding_list=candidate_embeddings,
+            lambda_mult=lambda_mult,
+            k=min(k, len(candidate_embeddings)),
+        )
+        return [candidates[i] for i in mmr_indices]

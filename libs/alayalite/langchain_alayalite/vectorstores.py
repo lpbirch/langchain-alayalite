@@ -6,15 +6,13 @@ import logging
 import uuid
 from collections.abc import Iterable, Sequence
 from itertools import cycle
-from typing import (
-    Any,
-)
-import numpy as np #add newed import
-from langchain_core.vectorstores.utils import maximal_marginal_relevance
+from typing import Any
 
+import numpy as np #add newed import
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 from langchain_core.vectorstores import VectorStore
+from langchain_core.vectorstores.utils import maximal_marginal_relevance
 
 logger = logging.getLogger(__name__)
 
@@ -595,11 +593,9 @@ class AlayaLite(VectorStore):
             lambda_mult=lambda_mult,
             k=min(k, len(candidate_embeddings)),
         )
-
         # 5) 按 MMR 顺序返回文档
         return [candidates[i] for i in mmr_indices]
-    
-    
+
     def max_marginal_relevance_search_by_vector(
         self,
         embedding: list[float],

@@ -10,8 +10,7 @@ from langchain_alayalite import AlayaLite
 class TestChromaStandard(VectorStoreIntegrationTests):
     @property
     def has_async(self) -> bool:
-        """AlayaLite does not support async operations."""
-        return False
+        return True
 
     @pytest.fixture
     def vectorstore(self) -> Generator[VectorStore, None, None]:  # type: ignore[override]

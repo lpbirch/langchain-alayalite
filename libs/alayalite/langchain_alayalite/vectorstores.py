@@ -9,6 +9,7 @@ from typing import Any
 import numpy as np
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
+from langchain_core.runnables.config import run_in_executor
 from langchain_core.vectorstores import VectorStore
 from langchain_core.vectorstores.utils import maximal_marginal_relevance
 
@@ -478,67 +479,90 @@ class AlayaLite(VectorStore):
             logger.error(f"Failed to delete collection '{self._collection_name}': {e}")
             raise
 
-    @staticmethod
-    def _async_not_supported(method_name: str) -> None:
-        """Raise NotImplementedError for async methods."""
-        raise NotImplementedError(
-            f"Async method '{method_name}' is not currently supported by AlayaLite. "
-            f"Please use the synchronous version: '{method_name[1:]}()'. "
-            f"Async support may be added in future versions."
-        )
-
     @classmethod
-    async def afrom_texts(cls, *args: Any, **kwargs: Any) -> AlayaLite:  # type: ignore[misc]
-        """Async from_texts - Not supported."""
-        cls._async_not_supported("afrom_texts")
-        raise NotImplementedError  # for type checker
+    async def afrom_texts(
+        cls,
+        texts: list[str],
+        embedding: Embeddings,
+        metadatas: list[dict] | None = None,
+        **kwargs: Any,
+    ) -> AlayaLite:
+        def _create() -> AlayaLite:
+            return cls.from_texts(
+                texts=texts,
+                embedding=embedding,
+                metadatas=metadatas,
+                **kwargs,
+            )
 
-    async def aadd_texts(self, *args: Any, **kwargs: Any) -> list[str]:
-        """Async add_texts - Not supported."""
-        self._async_not_supported("aadd_texts")
-        raise NotImplementedError  # for type checker
+        return await run_in_executor(None, _create)
 
-    async def asimilarity_search(self, *args: Any, **kwargs: Any) -> list[Document]:
-        """Async similarity_search - Not supported."""
-        self._async_not_supported("asimilarity_search")
-        raise NotImplementedError  # for type checker
+    async def aadd_texts(
+        self,
+        texts: Iterable[str],
+        metadatas: list[dict] | None = None,
+        *,
+        ids: list[str] | None = None,
+        **kwargs: Any,
+    ) -> list[str]:
+        if ids is not None:
+            kwargs["ids"] = ids
+        return await run_in_executor(None, self.add_texts, texts, metadatas, **kwargs)
+
+    async def asimilarity_search(
+        self, query: str, k: int = 4, **kwargs: Any
+    ) -> list[Document]:
+        return await run_in_executor(None, self.similarity_search, query, k, **kwargs)
 
     async def asimilarity_search_by_vector(
-        self, *args: Any, **kwargs: Any
+        self, embedding: list[float], k: int = 4, **kwargs: Any
     ) -> list[Document]:
-        """Async similarity_search_by_vector - Not supported."""
-        self._async_not_supported("asimilarity_search_by_vector")
-        raise NotImplementedError  # for type checker
+        return await run_in_executor(
+            None, self.similarity_search_by_vector, embedding, k, **kwargs
+        )
 
     async def asimilarity_search_with_score(
-        self, *args: Any, **kwargs: Any
+        self, query: str, k: int = 4, **kwargs: Any
     ) -> list[tuple[Document, float]]:
-        """Async similarity_search_with_score - Not supported."""
-        self._async_not_supported("asimilarity_search_with_score")
-        raise NotImplementedError  # for type checker
+        return await run_in_executor(
+            None, self.similarity_search_with_score, query, k, **kwargs
+        )
 
     async def asimilarity_search_with_score_by_vector(
-        self, *args: Any, **kwargs: Any
+        self, embedding: list[float], k: int = 4, **kwargs: Any
     ) -> list[tuple[Document, float]]:
-        """Async similarity_search_with_score_by_vector - Not supported."""
-        self._async_not_supported("asimilarity_search_with_score_by_vector")
-        raise NotImplementedError  # for type checker
+        return await run_in_executor(
+            None, self.similarity_search_with_score_by_vector, embedding, k, **kwargs
+        )
 
-    async def aget_by_ids(self, *args: Any, **kwargs: Any) -> list[Document]:
-        """Async get_by_ids - Not supported."""
-        self._async_not_supported("aget_by_ids")
-        raise NotImplementedError  # for type checker
+    async def aget_by_ids(self, ids: Sequence[str], /) -> list[Document]:
+        return await run_in_executor(None, self.get_by_ids, ids)
 
-    async def adelete(self, *args: Any, **kwargs: Any) -> bool:
-        """Async delete - Not supported."""
-        self._async_not_supported("adelete")
-        raise NotImplementedError  # for type checker
+    async def adelete(self, ids: list[str] | None = None, **kwargs: Any) -> bool:
+        return await run_in_executor(None, self.delete, ids, **kwargs)
+
+    async def aadd_documents(
+        self,
+        documents: list[Document],
+        **kwargs: Any,
+    ) -> list[str]:
+        return await run_in_executor(None, self.add_documents, documents, **kwargs)
 
     @classmethod
-    async def afrom_documents(cls, *args: Any, **kwargs: Any) -> AlayaLite:  # type: ignore[misc]
-        """Async from_documents - Not supported."""
-        cls._async_not_supported("afrom_documents")
-        raise NotImplementedError  # for type checker
+    async def afrom_documents(
+        cls,
+        documents: list[Document],
+        embedding: Embeddings,
+        **kwargs: Any,
+    ) -> AlayaLite:
+        def _create() -> AlayaLite:
+            return cls.from_documents(
+                documents=documents,
+                embedding=embedding,
+                **kwargs,
+            )
+
+        return await run_in_executor(None, _create)
 
     def max_marginal_relevance_search(
         self,

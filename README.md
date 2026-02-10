@@ -46,6 +46,7 @@ This project is officially maintained by members of the **AlayaLite team**, with
   - `get_by_ids`
   - `from_texts`
   - `from_documents`
+  - `MMR`
 - Passes **LangChain official standard integration test suite**
 - Simple configuration, production-ready API
 - High-performance, low-overhead backend
@@ -56,17 +57,8 @@ This project is officially maintained by members of the **AlayaLite team**, with
 
 - ✅ All **synchronous APIs** are fully supported.
 - ✅ Passes **LangChain official standard test suite** (except async tests).
-- ❌ **Asynchronous APIs are not fully supported yet**
-- ❌ **MMR (Maximal Marginal Relevance) retrieval is currently unavailable**
-
-### Notes
-
-Due to current limitations in the underlying `AlayaLite` storage engine, **asynchronous execution and MMR retrieval are temporarily unavailable**.
-
-These features are actively under development and planned for upcoming releases.
-
-> Except for async-related tests, **all LangChain official standard integration tests pass successfully**, ensuring correctness, consistency, and compatibility.
-
+- ✅ **Asynchronous APIs are not fully supported yet**
+- ✅ **MMR (Maximal Marginal Relevance) retrieval is currently unavailable**
 ---
 
 ## Installation

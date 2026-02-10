@@ -52,7 +52,6 @@ def test_alayalite_add_texts(alayalite_store: AlayaLite) -> None:
     ids = alayalite_store.add_texts(texts)
 
     assert len(ids) == 3
-    # 验证返回的 ID 是字符串
     assert all(isinstance(id_, str) for id_ in ids)
 
 
@@ -133,7 +132,6 @@ def test_alayalite_delete_all(alayalite_store: AlayaLite) -> None:
 
 
 def test_alayalite_from_texts(test_embeddings: ConsistentFakeEmbeddings) -> None:
-    """测试 from_texts 类方法。"""
     texts = ["Text 1", "Text 2", "Text 3"]
     metadatas = [{"id": 1}, {"id": 2}, {"id": 3}]
 

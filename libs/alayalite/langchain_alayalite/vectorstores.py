@@ -579,15 +579,11 @@ class AlayaLite(VectorStore):
         if self._collection is None:
             return []
 
-        # collection 内部 index 未初始化时，batch_query 会 assert，这里提前拦一下
         if not getattr(self._collection, "_Collection__index_py", None):
             return []
 
-        # 1) embed query
         query_embedding = self._embedding_function.embed_query(query)
 
-        # 2) 先做一次普通相似检索，取 fetch_k 个候选
-        #    注意：这里调用 by_vector，避免重复 embed
         candidates = self.similarity_search_by_vector(
             embedding=query_embedding,
             k=fetch_k,
@@ -596,7 +592,6 @@ class AlayaLite(VectorStore):
         if not candidates:
             return []
 
-        # 3) 拉取候选向量（按 candidates 顺序对齐）
         candidate_ids = [d.id for d in candidates if d.id is not None]
         if not candidate_ids:
             return []
@@ -610,14 +605,12 @@ class AlayaLite(VectorStore):
         if not candidate_embeddings:
             return []
 
-        # 4) MMR 选择（返回的是 candidate_embeddings 的下标）
         mmr_indices = maximal_marginal_relevance(
             query_embedding=np.asarray(query_embedding, dtype=np.float32),
             embedding_list=candidate_embeddings,
             lambda_mult=lambda_mult,
             k=min(k, len(candidate_embeddings)),
         )
-        # 5) 按 MMR 顺序返回文档
         return [candidates[i] for i in mmr_indices]
 
     def max_marginal_relevance_search_by_vector(

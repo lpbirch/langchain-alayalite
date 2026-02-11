@@ -57,8 +57,8 @@ This project is officially maintained by members of the **AlayaLite team**, with
 
 - ✅ All **synchronous APIs** are fully supported.
 - ✅ Passes **LangChain official standard test suite** (except async tests).
-- ✅ **Asynchronous APIs are not fully supported yet**
-- ✅ **MMR (Maximal Marginal Relevance) retrieval is currently unavailable**
+- ✅ **Asynchronous APIs are not supported **
+- ✅ **MMR (Maximal Marginal Relevance) retrieval is available**
 
 ---
 

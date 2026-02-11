@@ -38,18 +38,34 @@ This project is officially maintained by members of the **AlayaLite team**, with
 
 - Native **LangChain VectorStore** implementation
 - Fully compatible with **langchain-core**
-- Supports:
-  - `add_documents`
-  - `add_texts`
-  - `similarity_search`
-  - `similarity_search_with_score`
-  - `get_by_ids`
-  - `from_texts`
-  - `from_documents`
-  - `MMR`
+- Supports both **synchronous and asynchronous APIs**
+- Production-ready, high-performance backend powered by AlayaLite
+
+### Data Management
+
+- `add_documents` 
+- `add_texts` 
+- `delete`
+- `get_by_ids`
+
+### Similarity Search
+
+- `similarity_search`
+- `similarity_search_with_score`
+- `similarity_search_by_vector`
+
+### Advanced Retrieval
+
+- `max_marginal_relevance_search`
+- `max_marginal_relevance_search_by_vector` (MMR)
+
+### Construction Helpers
+
+- `from_texts`
+- `from_documents`
+
 - Passes **LangChain official standard integration test suite**
-- Simple configuration, production-ready API
-- High-performance, low-overhead backend
+
 
 ---
 

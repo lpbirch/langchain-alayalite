@@ -40,7 +40,10 @@ def alayalite_store(test_embeddings: ConsistentFakeEmbeddings) -> AlayaLite:
 
 def test_alayalite_initialization(test_embeddings: ConsistentFakeEmbeddings) -> None:
     store = AlayaLite(
-        embedding_function=test_embeddings, collection_name="test_init", drop_old=True
+        embedding_function=test_embeddings,
+        collection_name="test_init",
+        drop_old=True,
+        url="./test_alayalite_data",
     )
     assert store is not None
     assert store.embeddings == test_embeddings
@@ -128,7 +131,11 @@ def test_alayalite_delete_by_ids(alayalite_store: AlayaLite) -> None:
 
 
 def test_alayalite_delete_all(alayalite_store: AlayaLite) -> None:
-    pass
+    texts = ["To delete 1", "To delete 2"]
+    alayalite_store.add_texts(texts)
+
+    assert alayalite_store.delete() is True
+    assert alayalite_store.similarity_search("delete", k=1) == []
 
 
 def test_alayalite_from_texts(test_embeddings: ConsistentFakeEmbeddings) -> None:
@@ -141,6 +148,7 @@ def test_alayalite_from_texts(test_embeddings: ConsistentFakeEmbeddings) -> None
         metadatas=metadatas,
         collection_name="from_texts_test",
         drop_old=True,
+        url="./test_alayalite_data",
     )
 
     assert isinstance(store, AlayaLite)
@@ -162,6 +170,7 @@ def test_alayalite_from_documents(test_embeddings: ConsistentFakeEmbeddings) -> 
         embedding=test_embeddings,
         collection_name="from_docs_test",
         drop_old=True,
+        url="./test_alayalite_data",
     )
 
     assert isinstance(store, AlayaLite)
@@ -169,5 +178,13 @@ def test_alayalite_from_documents(test_embeddings: ConsistentFakeEmbeddings) -> 
     assert len(results) == 3
 
 
-def test_alayalite_async_methods_not_implemented(alayalite_store: AlayaLite) -> None:
-    pass
+@pytest.mark.asyncio
+async def test_alayalite_async_methods(alayalite_store: AlayaLite) -> None:
+    ids = await alayalite_store.aadd_texts(["Async doc"])
+
+    results = await alayalite_store.asimilarity_search("Async", k=1)
+    retrieved = await alayalite_store.aget_by_ids(ids)
+
+    assert len(results) == 1
+    assert results[0].page_content == "Async doc"
+    assert retrieved == [Document(page_content="Async doc", metadata={}, id=ids[0])]

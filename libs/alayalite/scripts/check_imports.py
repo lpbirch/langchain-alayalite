@@ -1,8 +1,8 @@
 """This module checks if the given python files can be imported without error."""
 
+import importlib.util
 import sys
 import traceback
-import importlib.util
 from pathlib import Path
 
 if __name__ == "__main__":

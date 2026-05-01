@@ -129,16 +129,7 @@ class AlayaLiteRetriever(BaseRetriever):
             msg = "`filter` must be a dictionary."
             raise ValueError(msg)
 
-        result = self.vectorstore._collection.filter_query(metadata_filter, limit=k)
-        return [
-            Document(page_content=doc, metadata=metadata, id=id_)
-            for id_, doc, metadata in zip(
-                result.get("id", []),
-                result.get("document", []),
-                result.get("metadata", []),
-                strict=True,
-            )
-        ]
+        return self.vectorstore.filter_search(metadata_filter, k=k)
 
     @override
     def _get_relevant_documents(

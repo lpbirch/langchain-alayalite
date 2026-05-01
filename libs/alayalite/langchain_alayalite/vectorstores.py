@@ -59,7 +59,37 @@ class AlayaLite(VectorStore):
             if collection_name in self._client.list_collections():
                 self._client.delete_collection(collection_name=collection_name)
 
-        self._collection = self._client.get_or_create_collection(name=collection_name)
+        self._collection = self._client.get_or_create_collection(
+            name=collection_name, **self._index_params
+        )
+
+    def _has_index(self) -> bool:
+        return bool(getattr(self._collection, "_Collection__index_py", None))
+
+    def _resolve_search_params(self, k: int, kwargs: dict[str, Any]) -> dict[str, Any]:
+        search_params = {**self._search_params, **kwargs}
+        ef_search = search_params.pop("ef_search", max(10, k))
+        num_threads = search_params.pop("num_threads", 1)
+        return {
+            **search_params,
+            "ef_search": max(ef_search, k),
+            "num_threads": num_threads,
+        }
+
+    def _get_embeddings_by_ids(self, ids: Sequence[str]) -> list[list[float]]:
+        index = getattr(self._collection, "_Collection__index_py", None)
+        outer_inner_map = getattr(self._collection, "_Collection__outer_inner_map", {})
+        if index is None:
+            return []
+
+        embeddings: list[list[float]] = []
+        for doc_id in ids:
+            inner_id = outer_inner_map.get(doc_id)
+            if inner_id is None:
+                continue
+            embedding = index.get_data_by_id(inner_id)
+            embeddings.append(np.asarray(embedding, dtype=np.float32).tolist())
+        return embeddings
 
     @property
     def embeddings(self) -> Embeddings | None:
@@ -281,7 +311,7 @@ class AlayaLite(VectorStore):
                 # Method 1: Delete and recreate collection
                 self._client.delete_collection(collection_name=self._collection_name)
                 self._collection = self._client.get_or_create_collection(
-                    name=self._collection_name
+                    name=self._collection_name, **self._index_params
                 )
                 return True
 
@@ -328,13 +358,15 @@ class AlayaLite(VectorStore):
         if self._collection is None:
             return []
 
-        if not getattr(self._collection, "_Collection__index_py", None):
+        if not self._has_index():
             return []
 
-        ef_search = kwargs.pop("ef_search", 10)
-        num_threads = kwargs.pop("num_threads", 1)
+        search_params = self._resolve_search_params(k, kwargs)
         res = self._collection.batch_query(
-            [embedding], limit=k, ef_search=ef_search, num_threads=num_threads
+            [embedding],
+            limit=k,
+            ef_search=search_params["ef_search"],
+            num_threads=search_params["num_threads"],
         )
 
         docs = [
@@ -348,6 +380,22 @@ class AlayaLite(VectorStore):
         ]
 
         return docs
+
+    def filter_search(self, filter: dict[str, Any], k: int = 4) -> list[Document]:
+        """Return documents matching an exact metadata filter."""
+        if self._collection is None:
+            return []
+
+        res = self._collection.filter_query(filter, limit=k)
+        return [
+            Document(page_content=doc, metadata=metadata, id=id_)
+            for id_, doc, metadata in zip(
+                res.get("id", []),
+                res.get("document", []),
+                res.get("metadata", []),
+                strict=True,
+            )
+        ]
 
     def similarity_search(
         self, query: str, k: int = 4, **kwargs: Any
@@ -385,10 +433,15 @@ class AlayaLite(VectorStore):
             List of Tuple(Document, float) most similar to the query vector.
         """
 
-        ef_search = kwargs.pop("ef_search", 10)
-        num_threads = kwargs.pop("num_threads", 1)
+        if self._collection is None or not self._has_index():
+            return []
+
+        search_params = self._resolve_search_params(k, kwargs)
         res = self._collection.batch_query(
-            [embedding], limit=k, ef_search=ef_search, num_threads=num_threads
+            [embedding],
+            limit=k,
+            ef_search=search_params["ef_search"],
+            num_threads=search_params["num_threads"],
         )
 
         docs = [
@@ -589,7 +642,7 @@ class AlayaLite(VectorStore):
         if self._collection is None:
             return []
 
-        if not getattr(self._collection, "_Collection__index_py", None):
+        if not self._has_index():
             return []
 
         query_embedding = self._embedding_function.embed_query(query)
@@ -606,12 +659,7 @@ class AlayaLite(VectorStore):
         if not candidate_ids:
             return []
 
-        try:
-            candidate_embeddings = self._collection.get_embeddings_by_id(candidate_ids)
-        except Exception as e:
-            logger.warning(f"get_embeddings_by_id failed: {e}")
-            return []
-
+        candidate_embeddings = self._get_embeddings_by_ids(candidate_ids)
         if not candidate_embeddings:
             return []
 
@@ -635,7 +683,7 @@ class AlayaLite(VectorStore):
             return []
         if self._collection is None:
             return []
-        if not getattr(self._collection, "_Collection__index_py", None):
+        if not self._has_index():
             return []
 
         candidates = self.similarity_search_by_vector(
@@ -650,10 +698,8 @@ class AlayaLite(VectorStore):
         if not candidate_ids:
             return []
 
-        try:
-            candidate_embeddings = self._collection.get_embeddings_by_id(candidate_ids)
-        except Exception as e:
-            logger.warning(f"get_embeddings_by_id failed: {e}")
+        candidate_embeddings = self._get_embeddings_by_ids(candidate_ids)
+        if not candidate_embeddings:
             return []
 
         mmr_indices = maximal_marginal_relevance(

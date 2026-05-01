@@ -31,7 +31,7 @@ format:
 	uv run ruff format $(PYTHON_FILES)
 
 test:
-	uv run pytest tests/unit_tests
+	uv run pytest tests
 
 tests: test
 

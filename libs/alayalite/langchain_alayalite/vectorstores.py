@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 import logging
+import os
+import shutil
 import uuid
 from collections.abc import Iterable, Sequence
 from itertools import cycle
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import numpy as np
 from langchain_core.documents import Document
@@ -16,6 +18,9 @@ from langchain_core.vectorstores.utils import maximal_marginal_relevance
 __all__ = ["AlayaLite"]
 
 logger = logging.getLogger(__name__)
+
+if TYPE_CHECKING:
+    from langchain_alayalite.retrievers import AlayaLiteRetriever
 
 
 class AlayaLite(VectorStore):
@@ -42,6 +47,11 @@ class AlayaLite(VectorStore):
         self._search_params = search_params or {}
         self._drop_old = drop_old
         self._url = url
+
+        if drop_old:
+            collection_url = os.path.join(os.path.abspath(url), collection_name)
+            if os.path.exists(collection_url):
+                shutil.rmtree(collection_url)
 
         self._client = alayalite.Client(url=self._url)
 
@@ -653,3 +663,10 @@ class AlayaLite(VectorStore):
             k=min(k, len(candidate_embeddings)),
         )
         return [candidates[i] for i in mmr_indices]
+
+    def as_retriever(self, **kwargs: Any) -> AlayaLiteRetriever:  # type: ignore[override]
+        """Return an `AlayaLiteRetriever` initialized from this vector store."""
+        from langchain_alayalite.retrievers import AlayaLiteRetriever
+
+        tags = kwargs.pop("tags", None) or [*self._get_retriever_tags()]
+        return AlayaLiteRetriever(vectorstore=self, tags=tags, **kwargs)

@@ -24,12 +24,14 @@ pip install -e .
 ## Features
 
 - Native LangChain `VectorStore` implementation
+- Native LangChain `BaseRetriever` implementation
 - Synchronous and asynchronous APIs
 - `add_texts` and `add_documents`
 - `delete` and `get_by_ids`
 - `similarity_search`, `similarity_search_by_vector`, and score variants
 - `max_marginal_relevance_search` and `max_marginal_relevance_search_by_vector`
 - `from_texts` and `from_documents` constructors
+- `AlayaLite.as_retriever()` with AlayaLite-specific search options
 - LangChain standard vector store test coverage
 
 ## Quick Start
@@ -59,6 +61,32 @@ results = vectorstore.similarity_search("lightweight vector database", k=2)
 
 for doc in results:
     print(doc.page_content)
+```
+
+## Retriever
+
+```python
+retriever = vectorstore.as_retriever(
+    k=4,
+    search_type="similarity",
+    search_kwargs={"ef_search": 20, "num_threads": 1},
+)
+
+docs = retriever.invoke("lightweight vector database")
+```
+
+You can also construct a retriever directly:
+
+```python
+from langchain_alayalite import AlayaLiteRetriever
+
+retriever = AlayaLiteRetriever(
+    embedding_function=embeddings,
+    texts=["alpha", "beta", "gamma"],
+    metadatas=[{"group": "a"}, {"group": "b"}, {"group": "a"}],
+    search_type="filter",
+    search_kwargs={"filter": {"group": "a"}},
+)
 ```
 
 ## Development

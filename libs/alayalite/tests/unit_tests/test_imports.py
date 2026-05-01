@@ -2,6 +2,7 @@ from langchain_alayalite import __all__
 
 EXPECTED_ALL = [
     "AlayaLite",
+    "AlayaLiteRetriever",
 ]
 
 

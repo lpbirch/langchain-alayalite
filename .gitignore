@@ -1,4 +1,5 @@
 .alayalite_data/
+.alayalite_metadata_filtering_data/
 __pycache__/
 *.pyc
 *.pyo

@@ -1,0 +1,98 @@
+{
+  "corpus_size": 1200,
+  "build_time_ms": 73.91170000482816,
+  "vectorstore_cases": [
+    {
+      "name": "single_metadata_key",
+      "filter": {
+        "topic": "vector-db"
+      },
+      "limit": 20,
+      "expected_total": 300,
+      "returned": 20,
+      "precision": 1.0,
+      "recall_at_limit": 1.0,
+      "latency_ms": 2.9824000084772706,
+      "passed": true
+    },
+    {
+      "name": "two_metadata_keys",
+      "filter": {
+        "topic": "rag",
+        "source": "manual"
+      },
+      "limit": 20,
+      "expected_total": 100,
+      "returned": 20,
+      "precision": 1.0,
+      "recall_at_limit": 1.0,
+      "latency_ms": 1.4691000105813146,
+      "passed": true
+    },
+    {
+      "name": "three_metadata_keys",
+      "filter": {
+        "topic": "ann",
+        "source": "blog",
+        "year": 2025
+      },
+      "limit": 20,
+      "expected_total": 33,
+      "returned": 20,
+      "precision": 1.0,
+      "recall_at_limit": 1.0,
+      "latency_ms": 1.5266999980667606,
+      "passed": true
+    },
+    {
+      "name": "limit_is_respected",
+      "filter": {
+        "access": "public"
+      },
+      "limit": 7,
+      "expected_total": 600,
+      "returned": 7,
+      "precision": 1.0,
+      "recall_at_limit": 1.0,
+      "latency_ms": 1.2986999936401844,
+      "passed": true
+    },
+    {
+      "name": "no_match_returns_empty",
+      "filter": {
+        "topic": "missing-topic"
+      },
+      "limit": 10,
+      "expected_total": 0,
+      "returned": 0,
+      "precision": 1.0,
+      "recall_at_limit": 1.0,
+      "latency_ms": 1.2017999979434535,
+      "passed": true
+    }
+  ],
+  "retriever_case": {
+    "name": "langchain_retriever_filter",
+    "filter": {
+      "topic": "langchain",
+      "access": "public"
+    },
+    "limit": 15,
+    "expected_total": 300,
+    "returned": 15,
+    "precision": 1.0,
+    "recall_at_limit": 1.0,
+    "latency_ms": 21.253999992040917,
+    "passed": true
+  },
+  "delete_by_filter": {
+    "filter": {
+      "access": "internal"
+    },
+    "expected_deleted": 600,
+    "remaining_deleted_matches": 0,
+    "remaining_public_matches": 600,
+    "passed": true
+  },
+  "all_passed": true
+}

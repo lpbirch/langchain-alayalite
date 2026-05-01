@@ -55,6 +55,7 @@ class CaseResult:
     filter: dict[str, Any]
     limit: int
     expected_total: int
+    selectivity: float
     returned: int
     precision: float
     recall_at_limit: float
@@ -135,6 +136,7 @@ def evaluate_case(
         filter=metadata_filter,
         limit=limit,
         expected_total=len(expected_all),
+        selectivity=len(expected_all) / len(documents),
         returned=len(actual),
         precision=precision,
         recall_at_limit=recall_at_limit,
@@ -264,14 +266,14 @@ def write_report(result: ExperimentResult, output_dir: Path) -> None:
     )
 
     rows = [
-        "| Case | Filter | Expected total | Returned | Precision | Recall@limit | Latency ms | Passed |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- |",
+        "| Case | Filter | Expected total | Selectivity | Returned | Precision | Recall@limit | Latency ms | Passed |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
     ]
     for case in result.vectorstore_cases + [result.retriever_case]:
         rows.append(
             "| "
             f"{case.name} | `{json.dumps(case.filter, ensure_ascii=False)}` | "
-            f"{case.expected_total} | {case.returned} | "
+            f"{case.expected_total} | {case.selectivity:.3%} | {case.returned} | "
             f"{case.precision:.3f} | {case.recall_at_limit:.3f} | "
             f"{case.latency_ms:.3f} | {case.passed} |"
         )
@@ -306,6 +308,11 @@ This report validates AlayaLite metadata filtering through the
 
 All metadata filtering checks passed: {result.all_passed}
 
+Precision and recall@limit are expected to be 1.0 for a correct exact-match
+metadata filter. The scale-sensitive evidence is the selectivity and latency
+columns: the experiment scans filters with 0% to 50% selectivity over
+{result.corpus_size} documents while preserving exact results.
+
 The experiment verifies exact-match metadata filtering for single-key and
 multi-key predicates, empty-result behavior, limit handling, LangChain retriever
 integration, and deletion by metadata filter.
@@ -315,7 +322,7 @@ integration, and deletion by metadata filter.
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--corpus-size", type=int, default=1200)
+    parser.add_argument("--corpus-size", type=int, default=50000)
     parser.add_argument(
         "--data-dir",
         type=Path,

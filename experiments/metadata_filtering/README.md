@@ -5,7 +5,7 @@ task book and midterm self-check form.
 
 It uses the local `langchain-alayalite` integration to:
 
-- Build a deterministic corpus with at least 1000 documents.
+- Build a deterministic corpus with 50000 documents by default.
 - Attach structured metadata fields: `topic`, `source`, `year`, `access`, and
   `shard`.
 - Verify `AlayaLite.filter_search()` for single-key and multi-key exact-match
@@ -19,6 +19,12 @@ Run from the repository root:
 
 ```bash
 ..\.venv\Scripts\python.exe experiments\metadata_filtering\metadata_filtering_experiment.py
+```
+
+To run a different scale:
+
+```bash
+..\.venv\Scripts\python.exe experiments\metadata_filtering\metadata_filtering_experiment.py --corpus-size 100000
 ```
 
 The script writes:

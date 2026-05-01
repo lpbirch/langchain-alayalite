@@ -1,6 +1,6 @@
 {
-  "corpus_size": 1200,
-  "build_time_ms": 73.91170000482816,
+  "corpus_size": 50000,
+  "build_time_ms": 2918.887800013181,
   "vectorstore_cases": [
     {
       "name": "single_metadata_key",
@@ -8,11 +8,12 @@
         "topic": "vector-db"
       },
       "limit": 20,
-      "expected_total": 300,
+      "expected_total": 12500,
+      "selectivity": 0.25,
       "returned": 20,
       "precision": 1.0,
       "recall_at_limit": 1.0,
-      "latency_ms": 2.9824000084772706,
+      "latency_ms": 32.52019999490585,
       "passed": true
     },
     {
@@ -22,11 +23,12 @@
         "source": "manual"
       },
       "limit": 20,
-      "expected_total": 100,
+      "expected_total": 4167,
+      "selectivity": 0.08334,
       "returned": 20,
       "precision": 1.0,
       "recall_at_limit": 1.0,
-      "latency_ms": 1.4691000105813146,
+      "latency_ms": 32.456100001581945,
       "passed": true
     },
     {
@@ -37,11 +39,12 @@
         "year": 2025
       },
       "limit": 20,
-      "expected_total": 33,
+      "expected_total": 1388,
+      "selectivity": 0.02776,
       "returned": 20,
       "precision": 1.0,
       "recall_at_limit": 1.0,
-      "latency_ms": 1.5266999980667606,
+      "latency_ms": 33.27640000497922,
       "passed": true
     },
     {
@@ -50,11 +53,12 @@
         "access": "public"
       },
       "limit": 7,
-      "expected_total": 600,
+      "expected_total": 25000,
+      "selectivity": 0.5,
       "returned": 7,
       "precision": 1.0,
       "recall_at_limit": 1.0,
-      "latency_ms": 1.2986999936401844,
+      "latency_ms": 30.738799992832355,
       "passed": true
     },
     {
@@ -64,10 +68,11 @@
       },
       "limit": 10,
       "expected_total": 0,
+      "selectivity": 0.0,
       "returned": 0,
       "precision": 1.0,
       "recall_at_limit": 1.0,
-      "latency_ms": 1.2017999979434535,
+      "latency_ms": 31.662699999287724,
       "passed": true
     }
   ],
@@ -78,20 +83,21 @@
       "access": "public"
     },
     "limit": 15,
-    "expected_total": 300,
+    "expected_total": 12500,
+    "selectivity": 0.25,
     "returned": 15,
     "precision": 1.0,
     "recall_at_limit": 1.0,
-    "latency_ms": 21.253999992040917,
+    "latency_ms": 50.49650000000838,
     "passed": true
   },
   "delete_by_filter": {
     "filter": {
       "access": "internal"
     },
-    "expected_deleted": 600,
+    "expected_deleted": 25000,
     "remaining_deleted_matches": 0,
-    "remaining_public_matches": 600,
+    "remaining_public_matches": 25000,
     "passed": true
   },
   "all_passed": true

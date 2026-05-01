@@ -1,5 +1,6 @@
 .alayalite_data/
 .alayalite_metadata_filtering_data/
+.alayalite_rag_deepseek_data/
 __pycache__/
 *.pyc
 *.pyo
